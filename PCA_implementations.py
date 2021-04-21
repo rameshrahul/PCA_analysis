@@ -6,8 +6,6 @@ from scipy.stats import wishart
 
 
 
-
-
 def k_dim_PCA(A, k):
     pca = PCA(n_components=k)
     return pca.fit_transform(A)
@@ -32,7 +30,7 @@ def microsoft_alg_1(A, epsilon, delta, k):
         for col in range(row, dimension, 1):
             E[row][col] = np.random.normal(0, 
                                            np.square(delta_1(epsilon, delta)))
-
+            E[col][row] = E[row][col]
 
     return k_dim_PCA(np.add(gram_A, E), k)
             
