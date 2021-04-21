@@ -56,7 +56,8 @@ def laplace_input_perturbation(A, epsilon, k):
     # to copy of upper triangle
     for row in range(dimension):
         for col in range(row, dimension, 1):
-            E[row][col] = np.random.laplace(0, 2 * dimension/(num_data * epsilon))
+            L[row][col] = np.random.laplace(0, 2 * dimension/(num_data * epsilon))
+            L[col][row] = E[row][col]
 
     
     gram_A = gram_A * (1/num_data)
