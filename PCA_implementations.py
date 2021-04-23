@@ -20,6 +20,7 @@ def k_dim_PCA(A, k):
     return k_rank
 
 def reconstruct_PCA(A, k_rank):
+    mu = np.mean(A, axis=0)
     k_rank = np.matmul(A, k_rank)
     k_rank += mu
     return k_rank
