@@ -74,7 +74,7 @@ def laplace_input_perturbation(A, epsilon, k):
     for row in range(dimension):
         for col in range(row, dimension, 1):
             L[row][col] = np.random.laplace(0, 2 * dimension/(num_data * epsilon))
-            L[col][row] = E[row][col]
+            L[col][row] = L[row][col]
 
     
     gram_A = gram_A * (1/num_data)
