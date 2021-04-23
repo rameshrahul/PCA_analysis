@@ -7,19 +7,22 @@ from scipy.stats import wishart
 
 
 #given matrix A, and number of components k,
-# attempts to reconstruct matrix A based on the first k components
+# calculated projection matrix based on first k components (works with A or ATA)
 # as seen here: https://stats.stackexchange.com/questions/229092/how-to-reverse-pca-and-reconstruct-original-variables-from-several-principal-com
 def k_dim_PCA(A, k):
-    mu = np.mean(A, axis=0)
+
     pca = PCA()
     pca.fit(A)
 
     #Xhat = np.dot(pca.transform(A)[:,:k], pca.components_[:k,:])
-    Xhat = np.matmul(np.transpose(pca.components_[:k, :]),pca.components_[:k, :])
-    Xhat = np.matmul(A, Xhat)
-    Xhat += mu
+    k_rank = np.matmul(np.transpose(pca.components_[:k, :]),pca.components_[:k, :])
     
-    return Xhat
+    return k_rank
+
+def reconstruct_PCA(A, k_rank):
+    k_rank = np.matmul(A, k_rank)
+    k_rank += mu
+    return k_rank
 
 
 def k_dim_PCA_projection(A, k):
