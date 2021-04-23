@@ -6,12 +6,25 @@ from scipy.stats import wishart
 
 
 
+#given matrix A, and number of components k,
+# attempts to reconstruct matrix A based on the first k components
+# as seen here: https://stats.stackexchange.com/questions/229092/how-to-reverse-pca-and-reconstruct-original-variables-from-several-principal-com
 def k_dim_PCA(A, k):
+    mu = np.mean(A, axis=0)
+    pca = PCA()
+    pca.fit(A)
+
+    #Xhat = np.dot(pca.transform(A)[:,:k], pca.components_[:k,:])
+    Xhat = np.matmul(np.transpose(pca.components_[:k, :]),pca.components_[:k, :])
+    Xhat = np.matmul(A, Xhat)
+    Xhat += mu
+    
+    return Xhat
+
+
+def k_dim_PCA_projection(A, k):
     pca = PCA(n_components=k)
     return pca.fit_transform(A)
-
-
-
 
 # implements Gaussian Mechanism - relasing covariance privately
 # as seen from Microsoft paper 
