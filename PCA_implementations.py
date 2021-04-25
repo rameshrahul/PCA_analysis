@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.decomposition import PCA   
+from sklearn.decomposition import PCA, TruncatedSVD   
 
 
 import scipy
@@ -12,8 +12,13 @@ num_samples = 1000
 # as seen here: https://stats.stackexchange.com/questions/229092/how-to-reverse-pca-and-reconstruct-original-variables-from-several-principal-com
 def k_dim_PCA(A, k):
 
-    pca = PCA()
-    pca.fit(A)
+    try:
+        pca = PCA()
+        pca.fit(A)
+    except TypeError:
+        pca = TruncatedSVD(k)
+        pca.fit(A)
+        #occurs when PCA does not support working on sparse matrix
 
     #Xhat = np.dot(pca.transform(A)[:,:k], pca.components_[:k,:])
     k_rank = np.matmul(np.transpose(pca.components_[:k, :]),pca.components_[:k, :])
@@ -94,10 +99,16 @@ def wishart(A, epsilon, delta, k):
     C = np.identity(dimension)*3/(2*num_data*epsilon)
     
     #randomly sample wishart
+    
+    #todo: implement random samples then taking average
     W = scipy.stats.wishart.rvs(df=dimension+1, scale=C, size=1)
     
     gram_A = gram_A * (1/num_data)
     
     k_rank = k_dim_PCA(np.add(gram_A, W), k)
     return reconstruct_PCA(A, k_rank)
+
+
+
+
 
