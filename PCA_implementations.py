@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.decomposition import PCA   
 
 
-from scipy.stats import wishart
+import scipy
 
 
 
@@ -33,7 +33,7 @@ def k_dim_PCA_projection(A, k):
 # implements Gaussian Mechanism - relasing covariance privately
 # as seen from Microsoft paper 
 # https://www.microsoft.com/en-us/research/wp-content/uploads/2014/06/PrivatePCA.pdf
-def microsoft_alg_1(A, epsilon, delta, k):
+def gaussian(A, epsilon, delta, k):
     
     gram_A = np.matmul(np.transpose(A), A)
     
@@ -49,7 +49,8 @@ def microsoft_alg_1(A, epsilon, delta, k):
                                            np.square(delta_1(epsilon, delta)))
             E[col][row] = E[row][col]
 
-    return k_dim_PCA(np.add(gram_A, E), k)
+    k_rank = k_dim_PCA(np.add(gram_A, E), k)
+    return reconstruct_PCA(A, k_rank)
             
 # delta function in microsoft for generating symmetric noise
 def delta_1(epsilon, delta):
@@ -61,7 +62,7 @@ def delta_1(epsilon, delta):
 # as seen from Jiang, Xie, and Zhang
 # https://arxiv.org/pdf/1511.05680.pdf
 
-def laplace_input_perturbation(A, epsilon, k):
+def laplace(A, epsilon, delta, k):
     
     gram_A = np.matmul(np.transpose(A), A)
     
@@ -79,24 +80,24 @@ def laplace_input_perturbation(A, epsilon, k):
     
     gram_A = gram_A * (1/num_data)
     
-    return k_dim_PCA(np.add(gram_A, L), k)
-
-
+    k_rank = k_dim_PCA(np.add(gram_A, L), k)
+    return reconstruct_PCA(A, k_rank)
 
 
 # implements Wishart input perturbation
 # https://arxiv.org/pdf/1511.05680.pdf
 
-def wishart_input_perturbation(A, epsilon, k):
+def wishart(A, epsilon, delta, k):
     gram_A = np.matmul(np.transpose(A), A)
     num_data, dimension = A.shape
     
     C = np.identity(dimension)*3/(2*num_data*epsilon)
     
     #randomly sample wishart
-    W = wishart.rvs(df=dimension+1, scale=C, size=1)
+    W = scipy.stats.wishart.rvs(df=dimension+1, scale=C, size=1)
     
     gram_A = gram_A * (1/num_data)
     
-    return k_dim_PCA(np.add(gram_A, W), k)
+    k_rank = k_dim_PCA(np.add(gram_A, W), k)
+    return reconstruct_PCA(A, k_rank)
 
