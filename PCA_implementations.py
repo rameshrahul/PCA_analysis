@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 
 import scipy
 
+num_samples = 1000
 
 
 #given matrix A, and number of components k,
@@ -45,8 +46,7 @@ def gaussian(A, epsilon, delta, k):
     # to copy of upper triangle
     for row in range(dimension):
         for col in range(row, dimension, 1):
-            E[row][col] = np.random.normal(0, 
-                                           np.square(delta_1(epsilon, delta)))
+            E[row][col] = np.mean(np.random.normal(0, np.square(delta_1(epsilon, delta)), size=num_samples))
             E[col][row] = E[row][col]
 
     k_rank = k_dim_PCA(np.add(gram_A, E), k)
@@ -74,7 +74,7 @@ def laplace(A, epsilon, delta, k):
     # to copy of upper triangle
     for row in range(dimension):
         for col in range(row, dimension, 1):
-            L[row][col] = np.random.laplace(0, 2 * dimension/(num_data * epsilon))
+            L[row][col] = np.mean(np.random.laplace(0, 2 * dimension/(num_data * epsilon), size=num_samples))
             L[col][row] = L[row][col]
 
     
