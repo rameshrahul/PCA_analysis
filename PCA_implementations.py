@@ -1,4 +1,5 @@
 import numpy as np
+from math import pi
 from sklearn.decomposition import PCA, TruncatedSVD   
 
 
@@ -101,11 +102,36 @@ def wishart(A, epsilon, delta, k):
     #randomly sample wishart
     
     #todo: implement random samples then taking average
+    #W = np.sum(scipy.stats.wishart.rvs(df=dimension+1, scale=C, size=num_samples))/num_samples
     W = scipy.stats.wishart.rvs(df=dimension+1, scale=C, size=1)
-    
     gram_A = gram_A * (1/num_data)
     
     k_rank = k_dim_PCA(np.add(gram_A, W), k)
+    return reconstruct_PCA(A, k_rank)
+
+
+
+def beta_1(dim, num_data, epsilon, delta):
+    return (dim+1)/(num_data*epsilon) * np.sqrt(2 * np.log((dim**2 + dim)/(delta*2*np.sqrt(2*pi)))) + 1/(num_data*np.sqrt(epsilon))
+
+# implement MOD_SULQ as described in chaudhuri
+# https://www.jmlr.org/papers/volume14/chaudhuri13a/chaudhuri13a.pdf
+
+def mod_sulq(A, epsilon, delta, k):
+    gram_A = np.matmul(np.transpose(A), A)
+    
+    num_data, dimension = A.shape 
+    E = np.zeros(gram_A.shape)
+    
+    
+    # set upper triangle including diagonal to normal. set lower triangle
+    # to copy of upper triangle
+    for row in range(dimension):
+        for col in range(row, dimension, 1):
+            E[row][col] = np.mean(np.random.normal(0, np.square(beta_1(dimension, num_data, epsilon, delta)), size=num_samples))
+            E[col][row] = E[row][col]
+
+    k_rank = k_dim_PCA(np.add(gram_A, E), k)
     return reconstruct_PCA(A, k_rank)
 
 
